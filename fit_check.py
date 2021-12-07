@@ -17,8 +17,11 @@ def app_fit(func,x,popts):
 # for use with multiple x->y datasets
 def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 
+	if len(x) != len(y):
+		print(f"X vector length {len(x)} does not match Y vector length {len(y)}")
+		raise ValueError
 	if mode == "cross":
-		
+
 		fit_list = []
 		R2_vec = []
 		Radj_vec = []
@@ -37,7 +40,7 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 			p_sigma = np.sqrt(np.diag(pcov))
 
 			d_fit["x"] = x_test
-			d_fit["y_a"] = y_fit
+			d_fit["y_a"] = y_test
 			d_fit["popt"] = popt
 			d_fit["pcov"] = pcov
 			d_fit["p_sigma"] = p_sigma
@@ -56,12 +59,13 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 			d_fit["res"] = res
 			m_err = max(abs(res))
 			mr_err = max([abs(res[k]/actual[k]) for k in range(len(actual)) if actual[k] != 0])
-			
+
 			d_fit["m_err"] = m_err
 			d_fit["mr_err"] = mr_err
 
 			s_res = np.std(res)
 			std_res = res/s_res
+			d_fit["std_res"] = std_res
 
 			y_bar = np.mean(actual)
 			ssr = np.sum(res**2)
@@ -89,7 +93,7 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 				p = popt[i]
 				p_err = p_sigma[i]*100
 				f_str += f"c{i+1} = {p:.3f} +- {p_err:.5f} %\n"
-			
+
 			d_fit["str"] = f_str
 			fit_list.append(d_fit)
 			R2_vec.append(R2)
@@ -132,7 +136,7 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 		p_sigma = np.sqrt(np.diag(pcov))
 
 		d_fit["x"] = x_test
-		d_fit["y_a"] = y_fit
+		d_fit["y_a"] = y_test
 		d_fit["popt"] = popt
 		d_fit["pcov"] = pcov
 		d_fit["p_sigma"] = p_sigma
@@ -151,12 +155,13 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 		d_fit["res"] = res
 		m_err = max(abs(res))
 		mr_err = max([abs(res[k]/actual[k]) for k in range(len(actual)) if actual[k] != 0])
-		
+
 		d_fit["m_err"] = m_err
 		d_fit["mr_err"] = mr_err
 
 		s_res = np.std(res)
 		std_res = res/s_res
+		d_fit["std_res"] = std_res
 
 		y_bar = np.mean(actual)
 		ssr = np.sum(res**2)
@@ -172,7 +177,7 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 		d_fit["Radj"] = Radj
 
 		f_str = (
-			"\nCELL {j} FIT SUMMARY:"
+			f"\nCELL {j} FIT SUMMARY:"
 			f"\nR-squared Fit: {100*R2:.3f} %\n"
 			f"R-adjusted Fit: {100*Radj:.3f} %\n\n"
 			f"Max Error: {m_err:.3f} \n"
@@ -183,7 +188,7 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 			p = popt[i]
 			p_err = p_sigma[i]*100
 			f_str += f"c{i+1} = {p:.3f} +- {p_err:.5f} %\n"
-		
+
 		d_fit["str"] = f_str
 		if prt:
 			print(f_str)
@@ -191,7 +196,7 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 
 	elif mode == "all":
 		d_fit = {}
-		
+
 		x_fit = np.hstack(x)
 		y_fit = np.hstack(y)
 
@@ -218,12 +223,13 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 		d_fit["res"] = res
 		m_err = max(abs(res))
 		mr_err = max([abs(res[k]/actual[k]) for k in range(len(actual)) if actual[k] != 0])
-		
+
 		d_fit["m_err"] = m_err
 		d_fit["mr_err"] = mr_err
 
 		s_res = np.std(res)
 		std_res = res/s_res
+		d_fit["std_res"] = std_res
 
 		y_bar = np.mean(actual)
 		ssr = np.sum(res**2)
@@ -250,13 +256,11 @@ def cfit(func,x,y,cf_kwargs,mode="cross",prt=True):
 			p = popt[i]
 			p_err = p_sigma[i]*100
 			f_str += f"c{i+1} = {p:.3f} +- {p_err:.5f} %\n"
-		
+
 		d_fit["str"] = f_str
 		if prt:
 			print(f_str)
 		return d_fit
-
-
 
 	# 	if PLOT:
 	# 		fig, (ax1,ax2) = plt.subplots(1,2,figsize=(16,6), dpi= 100, facecolor='w', edgecolor='k')
